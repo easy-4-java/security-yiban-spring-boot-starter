@@ -6,24 +6,23 @@
 
 **Spring Boot Starter for security-yiban**
 
-[![Maven Central](https://img.shields.io/maven-central/v/io.github.easy4j/security-yiban-spring-boot-starter)](https://github.com/easy-4-java/security-yiban-spring-boot-starter)
-[![Java](https://img.shields.io/badge/Java-17-orange)](#3-requirements-and-compatibility)
+[![Java](https://img.shields.io/badge/Java-8-orange)](#3-requirements-and-compatibility)
 [![License](https://img.shields.io/badge/license-Apache-2.0-green)](https://www.apache.org/licenses/LICENSE-2.0)
 
 [简体中文](./README.zh-CN.md) | [English](./README.md)
 
 [Positioning](#1-positioning) · [Capabilities](#2-core-capabilities) ·
-[Dependency](#5-dependency) · [Quick Start](#6-quick-start) ·
-[Configuration](#7-configuration-reference) · [Versions](#9-version-lines-and-compatibility) ·
-[Build](#10-build-and-test) · [License](#12-license)
+[Dependencies](#5-dependencies) · [Enable](#6-enable-yiban-configuration) ·
+[Configuration](#7-configuration-reference) · [Versions](#8-version-lines-and-compatibility) ·
+[Build](#9-build-and-test) · [License](#12-license)
 
 </div>
 
 ---
 
 > **Current Version**：`1.0.0-SNAPSHOT`<br>
-> **JDK Baseline**：`17`<br>
-> **Group ID**：`io.github.easy4j`<br>
+> **JDK Baseline**：`8`<br>
+> **Group ID inherited by the current POM**：`org.springframework.boot`<br>
 > **Artifact ID**：`security-yiban-spring-boot-starter`<br>
 > **License**：Apache License 2.0<br>
 
@@ -36,25 +35,25 @@
 | Type | Spring Boot Starter |
 | Consumers | Spring Boot applications using security-yiban |
 | Core Capabilities | auto-configuration, property binding, ready-to-use beans for security-yiban |
-| JDK | `17` |
-| Coordinates | `io.github.easy4j:security-yiban-spring-boot-starter:1.0.0-SNAPSHOT` |
-| Config Prefix | `security.yiban` |
+| JDK | `8` |
+| Source POM coordinates | `org.springframework.boot:security-yiban-spring-boot-starter:1.0.0-SNAPSHOT` |
+| Config Prefix | `spring.security.yiban` |
 
 ## 2. Core Capabilities
 
 | Capability | Status | Description |
 |---|:---:|---|
-| Auto-configuration | ✅ Stable | Registers security-yiban beans automatically |
-| Property Binding | ✅ Stable | Binds `security.yiban.*` to `SecurityYibanAuthcProperties` |
-| `Authorize` bean | ✅ Stable | Auto-registered via SecurityYibanAutoConfiguration |
+| Auto-configuration | Declared in source | Registers security-yiban beans automatically |
+| Property Binding | Declared in source | Binds `spring.security.yiban.authc.*` to `SecurityYibanAuthcProperties` |
+| `Authorize` bean | Declared in source | Auto-registered via SecurityYibanAutoConfiguration |
 
 ## 3. Requirements and Compatibility
 
 | Dependency | Minimum | Evidence |
 |---|---:|---|
-| JDK | `17` | `pom.xml` |
-| Spring Boot | `2.3.0.RELEASE` | `pom.xml` parent |
-| Maven | `3.6+` | Maven Enforcer |
+| JDK | `8` | `pom.xml` |
+| Spring Boot | `2.3.12.RELEASE` | `pom.xml` parent |
+| Maven | `3.0` | Maven Enforcer |
 
 ## 4. Auto-configuration
 
@@ -68,65 +67,44 @@ The starter auto-configures the following beans:
 | `YibanMatchedAuthenticationFailureHandler` | classpath + property | not created |
 | `YibanAuthenticationProvider` | classpath + property | not created |
 
-Auto-configuration registration:
+The source declares configuration classes, while the Boot 2.3 discovery file
+`META-INF/spring.factories` is absent. Verify configuration discovery and the
+live Yiban sign-in flow before using this branch.
 
-- `META-INF/spring/org.springframework.boot.autoconfigure.AutoConfiguration.imports` (Spring Boot 2.7+ / 3.x / 4.x)
-- `META-INF/spring.factories` (Spring Boot 2.x legacy)
+## 5. Dependencies
 
-## 5. Dependency
+The build requires two artifacts that are currently unresolved:
 
-```xml
-<dependency>
-    <groupId>io.github.easy4j</groupId>
-    <artifactId>security-yiban-spring-boot-starter</artifactId>
-    <version>1.0.0-SNAPSHOT</version>
-</dependency>
-```
+- `cn.yiban.open:java-sdk:1.6.0` for Yiban authorization and user APIs.
+- `io.github.easy4j:security-biz-spring-boot-starter:1.0.9-SNAPSHOT` for shared Spring Security components.
 
-No additional easy4j component dependencies.
+The [official Yiban Java download](https://open.yiban.cn/wiki/download/oauth_java.7z)
+contains a Servlet authorization example. The archive does not contain the Maven
+SDK JAR. Resolve both artifacts from a trusted repository and verify the Java 8
+build and Yiban integration before using any release coordinates.
 
-## 6. Quick Start
+## 6. Enable Yiban configuration
 
-### 6.1 Add dependency
-
-Add the dependency above to your `pom.xml`.
-
-### 6.2 Configure
+For an application that already loads the Yiban configuration:
 
 ```yaml
-security.yiban:
-  enabled: true
-```
-
-### 6.3 Use the bean
-
-```java
-@SpringBootApplication
-public class Application {
-    public static void main(String[] args) {
-        SpringApplication.run(Application.class, args);
-    }
-}
-```
-
-Then inject the auto-configured bean in your code:
-
-```java
-@Autowired
-private Authorize yibanAuthorize;
+spring:
+  security:
+    yiban:
+      enabled: true
 ```
 
 ## 7. Configuration Reference
 
 ### 7.1 Config Prefix
 
-`security.yiban`
+`spring.security.yiban`
 
 ### 7.2 Configuration Items
 
 | Property | Type | Default | Required | Description | Sensitive |
 |---|---|---|:---:|---|:---:|
-| `security.yiban.enabled` | boolean | `true` | No | Enable the starter | No |
+| `spring.security.yiban.enabled` | boolean | `false` | No | Enable the starter | No |
 <!-- additional properties below -->
 
 ## 8. Version Lines and Compatibility
@@ -135,20 +113,19 @@ private Authorize yibanAuthorize;
 |---|---:|---:|---|:---:|
 | `2.3.x` / `2.7.x` | `8+` | 2.3.x / 2.7.x | `1.0.x` | Maintenance |
 | `3.0.x` ~ `3.5.x` | `17` | 3.x | `2.0.x` | Maintenance |
-| `4.0.x` / `4.1.x` | `17+` | 4.x | `3.0.x` | Active |
+| `4.1.x` (`76dfef6`) | `21` | 4.1.2 | `4.1.x.20260630-SNAPSHOT` | Compilation blocked by missing SDK and authentication classes |
 
 ## 9. Build and Test
 
 ```bash
-mvn clean verify
-mvn -pl security-yiban-spring-boot-starter -am test
+mvn -U clean verify
 ```
 
 ## 10. Troubleshooting
 
 | Symptom | Diagnosis | Resolution |
 |---|---|---|
-| Bean not created | Check auto-configuration report | Verify `security.yiban.enabled=true` and classpath |
+| Bean not created | Check auto-configuration report | Verify `spring.security.yiban.enabled=true` and classpath |
 | `ClassNotFoundException` | Missing dependency | Add the required module |
 | Version conflict | `mvn dependency:tree` | Use BOM for version alignment |
 
