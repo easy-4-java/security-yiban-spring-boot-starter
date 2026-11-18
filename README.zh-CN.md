@@ -22,7 +22,7 @@
 
 > **当前版本**：`1.0.0-SNAPSHOT`<br>
 > **JDK 基线**：`8`<br>
-> **当前 POM 继承的 Group ID**：`org.springframework.boot`<br>
+> **Group ID**：`io.github.easy4j`<br>
 > **Artifact ID**：`security-yiban-spring-boot-starter`<br>
 > **许可证**：Apache License 2.0<br>
 
@@ -36,7 +36,7 @@
 | 消费方 | 使用 security-yiban 的 Spring Boot 应用 |
 | 核心能力 | 自动装配、属性绑定、开箱即用的 security-yiban Bean |
 | JDK | `8` |
-| 当前源码坐标 | `org.springframework.boot:security-yiban-spring-boot-starter:1.0.0-SNAPSHOT` |
+| 当前源码坐标 | `io.github.easy4j:security-yiban-spring-boot-starter:1.0.0-SNAPSHOT` |
 | 配置前缀 | `spring.security.yiban` |
 
 ## 2. 核心能力

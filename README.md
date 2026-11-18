@@ -22,7 +22,7 @@
 
 > **Current Version**：`1.0.0-SNAPSHOT`<br>
 > **JDK Baseline**：`8`<br>
-> **Group ID inherited by the current POM**：`org.springframework.boot`<br>
+> **Group ID**：`io.github.easy4j`<br>
 > **Artifact ID**：`security-yiban-spring-boot-starter`<br>
 > **License**：Apache License 2.0<br>
 
@@ -36,7 +36,7 @@
 | Consumers | Spring Boot applications using security-yiban |
 | Core Capabilities | auto-configuration, property binding, ready-to-use beans for security-yiban |
 | JDK | `8` |
-| Source POM coordinates | `org.springframework.boot:security-yiban-spring-boot-starter:1.0.0-SNAPSHOT` |
+| Source POM coordinates | `io.github.easy4j:security-yiban-spring-boot-starter:1.0.0-SNAPSHOT` |
 | Config Prefix | `spring.security.yiban` |
 
 ## 2. Core Capabilities
