@@ -78,6 +78,8 @@ Starter 自动装配以下 Bean：
 
 [易班官方下载的 Java 压缩包](https://open.yiban.cn/wiki/download/oauth_java.7z)包含 Servlet 授权示例，未提供上述 Maven SDK JAR。需先从可信来源解析这两个 Maven 制品，并完成 Java 8 构建和联调，再验证可用的发布坐标。
 
+Security Biz 的历史 `1.0.9` 源码使用旧组织坐标。对阿里云私服的独立解析显示，Easy4J 坐标下的 `1.0.9-SNAPSHOT` 和 Boot 2.3 维护版 `2.3.x.20260630-SNAPSHOT` 均未解析到。切换到维护版还需验证 Spring Security 版本及异常响应兼容性。
+
 ## 6. 启用配置
 
 在已加载 Yiban 配置的应用中使用以下开关：

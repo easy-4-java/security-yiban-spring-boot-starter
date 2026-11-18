@@ -83,6 +83,8 @@ contains a Servlet authorization example. The archive does not contain the Maven
 SDK JAR. Resolve both artifacts from a trusted repository and verify the Java 8
 build and Yiban integration before using any release coordinates.
 
+The historical Security Biz `1.0.9` source used earlier organization coordinates. Independent resolution from the configured Aliyun repository found neither `1.0.9-SNAPSHOT` nor the Boot 2.3 maintenance snapshot `2.3.x.20260630-SNAPSHOT` under the Easy4J coordinates. Moving to the maintained line also requires verification of Spring Security and authentication error compatibility.
+
 ## 6. Enable Yiban configuration
 
 For an application that already loads the Yiban configuration:
