@@ -490,8 +490,9 @@
         <maven-resources-plugin.version>3.1.0</maven-resources-plugin.version>
         <maven-surefire-plugin.version>2.22.1</maven-surefire-plugin.version>
         <maven-nexus-staging-plugin.version>1.6.8</maven-nexus-staging-plugin.version>
-        <yiban-sdk.version>1.6.0</yiban-sdk.version>
-        <spring-security-biz.version>2.3.x.20260630-SNAPSHOT</spring-security-biz.version>
+        <spring-security-biz.version>2.7.x.20260630-20261029.080305-2</spring-security-biz.version>
+        <spring-security.version>5.8.14</spring-security.version>
+        <spring-framework.version>5.3.39</spring-framework.version>
                 <commons-io.version>2.22.0</commons-io.version>
                 <httpclient.version>4.5.14</httpclient.version>
                 <javax.servlet-api.version>4.0.1</javax.servlet-api.version>
@@ -507,12 +508,6 @@
                 <groupId>io.github.easy4j</groupId>
                 <artifactId>security-biz-spring-boot-starter</artifactId>
                 <version>${spring-security-biz.version}</version>
-            </dependency>
-            <!-- https://mvnrepository.com/artifact/cn.yiban.open/java-sdk -->
-            <dependency>
-                <groupId>cn.yiban.open</groupId>
-                <artifactId>java-sdk</artifactId>
-                <version>${yiban-sdk.version}</version>
             </dependency>
             
             <!-- https://mvnrepository.com/artifact/commons-httpclient/commons-httpclient -->
@@ -683,11 +678,6 @@
             <artifactId>security-biz-spring-boot-starter</artifactId>
         </dependency>
                                   
-        <!-- https://mvnrepository.com/artifact/cn.yiban.open/java-sdk -->
-        <dependency>
-            <groupId>cn.yiban.open</groupId>
-            <artifactId>java-sdk</artifactId>
-        </dependency>
         
             <!-- For JUnit -->
             <dependency>
@@ -708,6 +698,11 @@
             <artifactId>junit-jupiter</artifactId>
             <scope>test</scope>
         </dependency>
+        <dependency>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-web</artifactId>
+        <scope>test</scope>
+    </dependency>
     </dependencies>
 
 <distributionManagement><repository><id>2624322-release-6F6h6R</id><name>Maven Release Repository</name><url>https://packages.aliyun.com/6927b116e6c3e0425dbdf60d/maven/2624322-release-6f6h6r</url><releases><enabled>true</enabled></releases><snapshots><enabled>false</enabled></snapshots></repository><snapshotRepository><id>2624322-snapshot-3EoOv3</id><name>Maven Snapshot Repository</name><url>https://packages.aliyun.com/6927b116e6c3e0425dbdf60d/maven/2624322-snapshot-3eoov3</url><releases><enabled>false</enabled></releases><snapshots><enabled>true</enabled></snapshots><uniqueVersion>true</uniqueVersion></snapshotRepository></distributionManagement></project>

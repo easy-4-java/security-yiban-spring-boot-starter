@@ -18,20 +18,20 @@ package org.springframework.security.boot.yiban.authentication;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
-import jakarta.servlet.FilterChain;
-import jakarta.servlet.ServletException;
-import jakarta.servlet.ServletRequest;
-import jakarta.servlet.ServletResponse;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
+import javax.servlet.FilterChain;
+import javax.servlet.ServletException;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.authentication.InternalAuthenticationServiceException;
 import org.springframework.security.boot.biz.authentication.PostOnlyAuthenticationProcessingFilter;
 import org.springframework.security.boot.biz.exception.AuthenticationTokenNotFoundException;
-import org.springframework.security.boot.utils.StringUtils;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.authentication.AbstractAuthenticationProcessingFilter;
@@ -41,7 +41,9 @@ import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.security.web.util.matcher.RequestMatcher;
 import org.springframework.util.CollectionUtils;
 
-import cn.yiban.open.Authorize;
+import org.springframework.security.boot.yiban.client.YibanOAuthClient;
+import org.springframework.security.boot.yiban.client.YibanAuthorizationState;
+import org.springframework.util.StringUtils;
 
 /**
  * Jwt授权 (authorization)过滤器
@@ -56,21 +58,27 @@ public class YibanAuthorizationProcessingFilter extends PostOnlyAuthenticationPr
 	private List<RequestMatcher> ignoreRequestMatchers;
 	
 	private SessionAuthenticationStrategy sessionStrategy = new NullAuthenticatedSessionStrategy();
-	private final Authorize authorize;
+	private final YibanOAuthClient authorize;
 	
-	public YibanAuthorizationProcessingFilter(Authorize authorize) {
+	public YibanAuthorizationProcessingFilter(YibanOAuthClient authorize) {
 		super(new AntPathRequestMatcher(AUTHORIZATION_PATH));
 		this.authorize = authorize;
+		setPostOnly(false);
 	}
 	
-	public YibanAuthorizationProcessingFilter(Authorize authorize, List<String> ignorePatterns) {
+	public YibanAuthorizationProcessingFilter(YibanOAuthClient authorize, List<String> ignorePatterns) {
 		super(new AntPathRequestMatcher(AUTHORIZATION_PATH));
 		this.setIgnoreRequestMatcher(ignorePatterns);
 		this.authorize = authorize;
+		setPostOnly(false);
 	}
 
 	@Override
 	protected boolean requiresAuthentication(HttpServletRequest request, HttpServletResponse response) {
+		if (Objects.isNull(request.getParameter(getAuthorizationParamName()))
+				&& Objects.isNull(request.getParameter("state")) && Objects.isNull(request.getParameter("error"))) {
+			return false;
+		}
 		// 忽略部分请求
 		if(!CollectionUtils.isEmpty(ignoreRequestMatchers)) {
 			for (RequestMatcher requestMatcher : ignoreRequestMatchers) {
@@ -143,20 +151,13 @@ public class YibanAuthorizationProcessingFilter extends PostOnlyAuthenticationPr
 	public Authentication doAttemptAuthentication(HttpServletRequest request, HttpServletResponse response)
 			throws AuthenticationException, IOException, ServletException {
 
-		String code = request.getParameter(getAuthorizationParamName());;
-
-		if (code == null) {
-			code = "";
+		YibanAuthorizationState.consume(request);
+		String code = request.getParameter(getAuthorizationParamName());
+		if (!StringUtils.hasText(code)) {
+			throw new AuthenticationTokenNotFoundException("Missing Yiban authorization code");
 		}
+		String token = authorize.exchangeCode(code.trim());
 
-		code = code.trim();
-		
-		String token = authorize.querytoken(code, "");
-		
-		if(!StringUtils.hasText(token)) {
-			throw new AuthenticationTokenNotFoundException("yiban token not provided");
-		}
-		
 		AbstractAuthenticationToken authRequest = new YibanAuthenticationToken(token);
 
 		// Allow subclasses to set the "details" property
