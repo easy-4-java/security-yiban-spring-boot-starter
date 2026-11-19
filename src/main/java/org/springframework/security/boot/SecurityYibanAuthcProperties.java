@@ -26,7 +26,6 @@ import org.springframework.security.boot.biz.property.SecurityLogoutProperties;
 import org.springframework.security.boot.yiban.authentication.YibanAuthorizationProcessingFilter;
 import org.springframework.security.core.Authentication;
 
-import cn.yiban.open.Authorize;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -40,6 +39,10 @@ public class SecurityYibanAuthcProperties extends SecurityAuthcProperties {
 
 	public static final String PREFIX = "spring.security.yiban.authc";
 
+	public SecurityYibanAuthcProperties() {
+		setPathPattern(YibanAuthorizationProcessingFilter.AUTHORIZATION_PATH);
+	}
+
 	/**
 	 * 接入应用 APPID
 	 */
@@ -47,6 +50,7 @@ public class SecurityYibanAuthcProperties extends SecurityAuthcProperties {
 	/**
 	 * 接入应用的 AppSecret
 	 */
+	@ToString.Exclude
 	private String appSecret;
 	private String callback;
 
@@ -64,7 +68,6 @@ public class SecurityYibanAuthcProperties extends SecurityAuthcProperties {
 	/** 异常页面：认证失败时的跳转路径 */
 	private String failureUrl = "/error";
 
-	private Authorize.DISPLAY_TAG_T display = Authorize.DISPLAY_TAG_T.WEB;
 
 	private String authorizationParamName = YibanAuthorizationProcessingFilter.AUTHORIZATION_PARAM;
 

@@ -10,23 +10,28 @@ import org.springframework.security.boot.biz.userdetails.UserDetailsServiceAdapt
 import org.springframework.security.boot.yiban.authentication.YibanAuthenticationProvider;
 import org.springframework.security.boot.yiban.authentication.YibanMatchedAuthenticationEntryPoint;
 import org.springframework.security.boot.yiban.authentication.YibanMatchedAuthenticationFailureHandler;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
 
-import cn.yiban.open.Authorize;
+import org.springframework.security.boot.yiban.client.YibanOAuthClient;
+import org.springframework.util.StringUtils;
 
 @Configuration
 @AutoConfigureBefore(SecurityBizAutoConfiguration.class)
 @ConditionalOnProperty(prefix = SecurityYibanProperties.PREFIX, value = "enabled", havingValue = "true")
-@EnableConfigurationProperties({ SecurityYibanProperties.class })
+@EnableConfigurationProperties({ SecurityYibanProperties.class, SecurityYibanAuthcProperties.class })
 public class SecurityYibanAutoConfiguration {
 
 	/**
-	 * 在程序文件中导入并使用AppID与AppSecret来初始化cn.yiban.open.Authorize
+	 * 创建使用当前易班 OAuth 接口的客户端。
 	 */
 	@Bean
-	public Authorize yibanAuthorize(SecurityYibanAuthcProperties authcProperties) {
-		return new Authorize(authcProperties.getAppKey(), authcProperties.getAppSecret());
+	@ConditionalOnMissingBean(YibanOAuthClient.class)
+	public YibanOAuthClient yibanAuthorize(SecurityYibanAuthcProperties authcProperties) {
+		String redirectUri = authcProperties.getRedirect_uri();
+		if (!StringUtils.hasText(redirectUri)) {
+			redirectUri = authcProperties.getCallback();
+		}
+		return new YibanOAuthClient(authcProperties.getAppKey(), authcProperties.getAppSecret(), redirectUri);
 	}
 
 
@@ -54,8 +59,8 @@ public class SecurityYibanAutoConfiguration {
 
 	@Bean
 	public YibanAuthenticationProvider yibanAuthenticationProvider(UserDetailsServiceAdapter userDetailsService,
-			PasswordEncoder passwordEncoder) {
-		return new YibanAuthenticationProvider(userDetailsService);
+			YibanOAuthClient yibanAuthorize) {
+		return new YibanAuthenticationProvider(userDetailsService, yibanAuthorize);
 	}
 
 }

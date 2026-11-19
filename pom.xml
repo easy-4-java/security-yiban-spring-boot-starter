@@ -475,6 +475,7 @@
     
     <properties>
         <java.version>1.8</java.version>
+        <spring-security.version>5.8.14</spring-security.version>
 
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
@@ -490,7 +491,6 @@
         <maven-resources-plugin.version>3.1.0</maven-resources-plugin.version>
         <maven-surefire-plugin.version>2.22.1</maven-surefire-plugin.version>
         <maven-nexus-staging-plugin.version>1.6.8</maven-nexus-staging-plugin.version>
-        <yiban-sdk.version>1.6.0</yiban-sdk.version>
         <spring-security-biz.version>2.7.x.20260630-SNAPSHOT</spring-security-biz.version>
                 <commons-io.version>2.22.0</commons-io.version>
                 <httpclient.version>4.5.14</httpclient.version>
@@ -507,12 +507,6 @@
                 <groupId>io.github.easy4j</groupId>
                 <artifactId>security-biz-spring-boot-starter</artifactId>
                 <version>${spring-security-biz.version}</version>
-            </dependency>
-            <!-- https://mvnrepository.com/artifact/cn.yiban.open/java-sdk -->
-            <dependency>
-                <groupId>cn.yiban.open</groupId>
-                <artifactId>java-sdk</artifactId>
-                <version>${yiban-sdk.version}</version>
             </dependency>
             
             <!-- https://mvnrepository.com/artifact/commons-httpclient/commons-httpclient -->
@@ -683,11 +677,6 @@
             <artifactId>security-biz-spring-boot-starter</artifactId>
         </dependency>
                                   
-        <!-- https://mvnrepository.com/artifact/cn.yiban.open/java-sdk -->
-        <dependency>
-            <groupId>cn.yiban.open</groupId>
-            <artifactId>java-sdk</artifactId>
-        </dependency>
         
             <!-- For JUnit -->
             <dependency>
@@ -706,6 +695,11 @@
             <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
             <scope>test</scope>
         </dependency>
     </dependencies>
