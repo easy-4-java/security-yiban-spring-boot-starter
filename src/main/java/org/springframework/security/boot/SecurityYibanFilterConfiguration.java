@@ -1,16 +1,19 @@
 package org.springframework.security.boot;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.extension.web.servlet.i18n.LocaleContextFilter;
-import org.springframework.boot.autoconfigure.AutoConfigureBefore;
+import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.boot.autoconfigure.web.ServerProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Bean;
+import org.springframework.core.annotation.Order;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.boot.biz.authentication.AuthenticationListener;
 import org.springframework.security.boot.biz.authentication.nested.MatchedAuthenticationEntryPoint;
@@ -23,17 +26,21 @@ import org.springframework.security.boot.yiban.authentication.YibanAuthorization
 import org.springframework.security.boot.yiban.authentication.YibanPreAuthenticatedProcessingFilter;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.web.AuthenticationEntryPoint;
+import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+import org.springframework.security.web.util.matcher.OrRequestMatcher;
+import org.springframework.security.web.util.matcher.RequestMatcher;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.RememberMeServices;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.authentication.session.SessionAuthenticationStrategy;
 
-import cn.yiban.open.Authorize;
+import org.springframework.security.boot.yiban.client.YibanOAuthClient;
 
 @Configuration
-@AutoConfigureBefore(name = { 
-	"org.springframework.boot.autoconfigure.security.servlet.SecurityFilterAutoConfiguration"
+@AutoConfigureAfter(name = {
+	"org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration"
 })
 @ConditionalOnWebApplication
 @ConditionalOnProperty(prefix = SecurityYibanProperties.PREFIX, value = "enabled", havingValue = "true")
@@ -45,7 +52,7 @@ public class SecurityYibanFilterConfiguration {
 	static class YibanWebSecurityConfigurerAdapter extends WebSecurityBizConfigurerAdapter {
 		
 		private final SecurityYibanAuthcProperties authcProperties;
-		private final Authorize yibanAuthorize;
+		private final YibanOAuthClient yibanAuthorize;
 
 		private final LocaleContextFilter localeContextFilter;
 	    private final AuthenticationEntryPoint authenticationEntryPoint;
@@ -60,7 +67,7 @@ public class SecurityYibanFilterConfiguration {
 				SecuritySessionMgtProperties sessionMgtProperties,
 				SecurityYibanAuthcProperties authcProperties,
 
-				ObjectProvider<Authorize> authorizeProvider,
+				ObjectProvider<YibanOAuthClient> authorizeProvider,
 				ObjectProvider<LocaleContextFilter> localeContextProvider,
 				ObjectProvider<AuthenticationProvider> authenticationProvider,
    				ObjectProvider<AuthenticationListener> authenticationListenerProvider,
@@ -88,17 +95,14 @@ public class SecurityYibanFilterConfiguration {
 		
 		public YibanPreAuthenticatedProcessingFilter preAuthenticatedProcessingFilter() throws Exception {
 	    	
-			YibanPreAuthenticatedProcessingFilter authcFilter = new YibanPreAuthenticatedProcessingFilter( yibanAuthorize, 
-	        		authcProperties.getCallback(),
-	        		authcProperties.getState(),
-	        		authcProperties.getDisplay());
-			
-	        return authcFilter;
+			return new YibanPreAuthenticatedProcessingFilter(yibanAuthorize,
+					authcProperties.getLoginUrl(), authcProperties.getAuthorizationParamName());
 	    }
 		
 		public YibanAuthorizationProcessingFilter authenticationProcessingFilter() throws Exception {
 	    	
 			YibanAuthorizationProcessingFilter authcFilter = new YibanAuthorizationProcessingFilter(yibanAuthorize);
+			authcFilter.setAuthorizationParamName(authcProperties.getAuthorizationParamName());
 
 			authcFilter.setAllowSessionCreation(getSessionMgtProperties().isAllowSessionCreation());
 			authcFilter.setAuthenticationFailureHandler(authenticationFailureHandler);
@@ -109,22 +113,43 @@ public class SecurityYibanFilterConfiguration {
 			if (StringUtils.hasText(authcProperties.getLoginUrl())) {
 				authcFilter.setFilterProcessesUrl(authcProperties.getLoginUrl());
 			}
-			authcFilter.setRememberMeServices(rememberMeServices);
-			authcFilter.setSessionAuthenticationStrategy(sessionAuthenticationStrategy);
+			if (Objects.nonNull(rememberMeServices)) {
+				authcFilter.setRememberMeServices(rememberMeServices);
+			}
+			if (Objects.nonNull(sessionAuthenticationStrategy)) {
+				authcFilter.setSessionAuthenticationStrategy(sessionAuthenticationStrategy);
+			}
 			
 	        return authcFilter;
 	    }
 		
+		@Bean
+		@Order(100)
+		WebSecurityConfigurerAdapter yibanSecurityConfigurer() {
+			return new WebSecurityConfigurerAdapter() {
+				@Override
+				protected void configure(HttpSecurity http) throws Exception {
+					YibanWebSecurityConfigurerAdapter.this.configure(http);
+				}
+			};
+		}
+
 		@Override
 		protected void configure(HttpSecurity http) throws Exception {
+			if (Objects.nonNull(localeContextFilter)) {
+				http.addFilterBefore(localeContextFilter, UsernamePasswordAuthenticationFilter.class);
+			}
 
-			http.antMatcher(authcProperties.getPathPattern())
+			RequestMatcher login = new AntPathRequestMatcher(authcProperties.getLoginUrl());
+			String pathPattern = authcProperties.getPathPattern();
+			RequestMatcher scope = StringUtils.hasText(pathPattern)
+					? new OrRequestMatcher(login, new AntPathRequestMatcher(pathPattern)) : login;
+			http.requestMatcher(scope)
 	        	.exceptionHandling()
 	        	.authenticationEntryPoint(authenticationEntryPoint)
 	        	.and()
 	        	.httpBasic()
 	        	.disable()
-	        	.addFilterBefore(localeContextFilter, UsernamePasswordAuthenticationFilter.class)
 	        	.addFilterBefore(preAuthenticatedProcessingFilter(), UsernamePasswordAuthenticationFilter.class)
 	        	.addFilterBefore(authenticationProcessingFilter(), UsernamePasswordAuthenticationFilter.class); 
 	    	

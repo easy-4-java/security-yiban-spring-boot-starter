@@ -45,7 +45,7 @@
 |---|:---:|---|
 | 自动装配 | 源码已声明 | 自动注册 security-yiban 相关 Bean |
 | 属性绑定 | 源码已声明 | 绑定 `spring.security.yiban.authc.*` 到 `SecurityYibanAuthcProperties` |
-| `Authorize` Bean | 源码已声明 | 通过 SecurityYibanAutoConfiguration 自动注册 |
+| `YibanOAuthClient` Bean | 源码已声明 | 通过 SecurityYibanAutoConfiguration 自动注册 |
 
 ## 3. 运行要求与兼容性
 
@@ -60,9 +60,7 @@
 快照构建 `2.7.x.20260630-20261029.080305-2`，本 Starter 在 JDK 8 与 Boot 2.3.12 上验证其运行兼容性。
 构建和消费该构件时需配置 Easy4J Maven 快照仓库。
 
-构建校验仓库内 `YBApi_sdk_java.zip` 中 `YBOpenApi.jar` 的 SHA-256，再打包 2015-08-20
-归档中的 SDK 类。HTTP 传输使用 JVM 证书信任库和主机名校验，设定超时并禁用重定向。
-Starter 不再解析 `cn.yiban.open:java-sdk:1.6.0`。
+Starter 使用现有 Apache HttpClient 实现易班 Java 官方示例 2.26.1103 的 OAuth 协议。接口请求使用 JVM 信任库和主机名校验，并禁用重定向。
 
 ## 4. 自动装配
 
@@ -70,24 +68,17 @@ Starter 自动装配以下 Bean：
 
 | Bean | 条件 | 缺失时行为 |
 |---|---|---|
-| `Authorize` | classpath + property | 不创建 |
+| `YibanOAuthClient` | classpath + property | 不创建 |
 | `SecurityContextLogoutHandler` | classpath + property | 不创建 |
 | `YibanMatchedAuthenticationEntryPoint` | classpath + property | 不创建 |
 | `YibanMatchedAuthenticationFailureHandler` | classpath + property | 不创建 |
 | `YibanAuthenticationProvider` | classpath + property | 不创建 |
 
-当前源码包含配置类，但没有 Boot 2.3 自动发现使用的 `META-INF/spring.factories`。自动发现及真实易班登录流程仍待验证。
+Boot 2.3 通过 `META-INF/spring.factories` 发现这些自动配置。注册回调默认应指向 `/login/yiban`，也可使用应用配置的 `spring.security.yiban.authc.login-url`。
 
 ## 5. 引入依赖
 
-本分支构建仍需解析以下依赖：
-
-- `cn.yiban.open:java-sdk:1.6.0`，易班授权及用户接口。
-- `io.github.easy4j:security-biz-spring-boot-starter:1.0.9-SNAPSHOT`，通用 Spring Security 组件。
-
-[易班官方下载的 Java 压缩包](https://open.yiban.cn/wiki/download/oauth_java.7z)包含 Servlet 授权示例，未提供上述 Maven SDK JAR。需先从可信来源解析这两个 Maven 制品，并完成 Java 8 构建和联调，再验证可用的发布坐标。
-
-Security Biz 的历史 `1.0.9` 源码使用旧组织坐标。对阿里云私服的独立解析显示，Easy4J 坐标下的 `1.0.9-SNAPSHOT` 和 Boot 2.3 维护版 `2.3.x.20260630-SNAPSHOT` 均未解析到。切换到维护版还需验证 Spring Security 版本及异常响应兼容性。
+使用 Starter 时需能从 Easy4J 快照仓库解析 Security Biz，应用需提供 `UserDetailsServiceAdapter` Bean，把已验证的易班凭据映射到本地账号。
 
 ## 6. 启用配置
 
@@ -98,6 +89,10 @@ spring:
   security:
     yiban:
       enabled: true
+      authc:
+        app-key: ${YIBAN_APP_KEY}
+        app-secret: ${YIBAN_APP_SECRET}
+        callback: https://app.example.com/login/yiban
 ```
 
 ## 7. 配置参考
@@ -112,6 +107,8 @@ spring:
 |---|---|---|:---:|---|:---:|
 | `spring.security.yiban.enabled` | boolean | `false` | 否 | 是否启用 Starter | 否 |
 <!-- 更多属性见下方 -->
+
+授权流程使用会话内的一次性状态。升级已接入易班的应用时，请核对[迁移说明](docs/reviews/pr-2-current-oauth.md)。
 
 ## 8. 版本线与兼容性
 
