@@ -9,6 +9,7 @@
         <relativePath /> 
     </parent>
     
+    <groupId>io.github.easy4j</groupId>
     <artifactId>security-yiban-spring-boot-starter</artifactId>
     <description>Spring Boot Starter For Spring Security With yiban SDK </description>
     <version>2.7.x.20260630-SNAPSHOT</version>
@@ -524,7 +525,7 @@
             
             <!-- For Not-Yet-Commons Ssl -->
             <dependency>
-                <groupId>org.apache.commons</groupId>
+                <groupId>ca.juliusdavies</groupId>
                 <artifactId>not-yet-commons-ssl</artifactId>
                 <version>${commons-not-yet-ssl.version}</version>
             </dependency>
@@ -664,7 +665,7 @@
         </dependency>
         <!-- For Not-Yet-Commons Ssl -->
         <dependency>
-            <groupId>org.apache.commons</groupId>
+            <groupId>ca.juliusdavies</groupId>
             <artifactId>not-yet-commons-ssl</artifactId>
         </dependency>
         
