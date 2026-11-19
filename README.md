@@ -45,7 +45,7 @@
 |---|:---:|---|
 | Auto-configuration | Declared in source | Registers security-yiban beans automatically |
 | Property Binding | Declared in source | Binds `spring.security.yiban.authc.*` to `SecurityYibanAuthcProperties` |
-| `Authorize` bean | Declared in source | Auto-registered via SecurityYibanAutoConfiguration |
+| `YibanOAuthClient` bean | Declared in source | Auto-registered via SecurityYibanAutoConfiguration |
 
 ## 3. Requirements and Compatibility
 
@@ -60,10 +60,7 @@ For Boot 2.3 applications using the Boot parent, set `spring-framework.version` 
 snapshot build `2.7.x.20260630-20261029.080305-2`, which is verified with Boot 2.3.12 and JDK 8
 in this starter. Use the Easy4J Maven snapshot settings when building or consuming it.
 
-The build checks the SHA-256 of `YBOpenApi.jar` in the repository's `YBApi_sdk_java.zip`
-and includes the SDK classes from the 2015-08-20 archive. It supplies a replacement HTTP transport
-with the JVM's certificate trust and hostname verification, bounded timeouts and no redirects.
-The starter no longer resolves `cn.yiban.open:java-sdk:1.6.0`.
+The starter implements the OAuth contract from the official Yiban Java example (2.26.1103) with its existing Apache HttpClient. It uses the JVM trust store and hostname verification and disables redirects for API requests.
 
 ## 4. Auto-configuration
 
@@ -71,29 +68,17 @@ The starter auto-configures the following beans:
 
 | Bean | Condition | Missing Behavior |
 |---|---|---|
-| `Authorize` | classpath + property | not created |
+| `YibanOAuthClient` | classpath + property | not created |
 | `SecurityContextLogoutHandler` | classpath + property | not created |
 | `YibanMatchedAuthenticationEntryPoint` | classpath + property | not created |
 | `YibanMatchedAuthenticationFailureHandler` | classpath + property | not created |
 | `YibanAuthenticationProvider` | classpath + property | not created |
 
-The source declares configuration classes, while the Boot 2.3 discovery file
-`META-INF/spring.factories` is absent. Verify configuration discovery and the
-live Yiban sign-in flow before using this branch.
+Boot 2.3 discovers these configurations through `META-INF/spring.factories`. The registered callback must route to `/login/yiban` by default, or to the configured `spring.security.yiban.authc.login-url`.
 
 ## 5. Dependencies
 
-The build requires two artifacts that are currently unresolved:
-
-- `cn.yiban.open:java-sdk:1.6.0` for Yiban authorization and user APIs.
-- `io.github.easy4j:security-biz-spring-boot-starter:1.0.9-SNAPSHOT` for shared Spring Security components.
-
-The [official Yiban Java download](https://open.yiban.cn/wiki/download/oauth_java.7z)
-contains a Servlet authorization example. The archive does not contain the Maven
-SDK JAR. Resolve both artifacts from a trusted repository and verify the Java 8
-build and Yiban integration before using any release coordinates.
-
-The historical Security Biz `1.0.9` source used earlier organization coordinates. Independent resolution from the configured Aliyun repository found neither `1.0.9-SNAPSHOT` nor the Boot 2.3 maintenance snapshot `2.3.x.20260630-SNAPSHOT` under the Easy4J coordinates. Moving to the maintained line also requires verification of Spring Security and authentication error compatibility.
+Use the starter with the Easy4J Security Biz dependency available from the snapshot repository. Provide a `UserDetailsServiceAdapter` bean to map verified Yiban credentials to a local account.
 
 ## 6. Enable Yiban configuration
 
@@ -104,6 +89,10 @@ spring:
   security:
     yiban:
       enabled: true
+      authc:
+        app-key: ${YIBAN_APP_KEY}
+        app-secret: ${YIBAN_APP_SECRET}
+        callback: https://app.example.com/login/yiban
 ```
 
 ## 7. Configuration Reference
@@ -118,6 +107,8 @@ spring:
 |---|---|---|:---:|---|:---:|
 | `spring.security.yiban.enabled` | boolean | `false` | No | Enable the starter | No |
 <!-- additional properties below -->
+
+Authorization uses a one-time session state. Check the [OAuth migration notes](docs/reviews/pr-2-current-oauth.md) when updating existing Yiban integrations.
 
 ## 8. Version Lines and Compatibility
 
