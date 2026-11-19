@@ -55,6 +55,16 @@
 | Spring Boot | `2.3.12.RELEASE` | `pom.xml` parent |
 | Maven | `3.0` | Maven Enforcer |
 
+For Boot 2.3 applications using the Boot parent, set `spring-framework.version` to `5.3.39` and
+`spring-security.version` to `5.8.14` in the application POM. Security Biz is pinned to the Easy4J
+snapshot build `2.7.x.20260630-20261029.080305-2`, which is verified with Boot 2.3.12 and JDK 8
+in this starter. Use the Easy4J Maven snapshot settings when building or consuming it.
+
+The build checks the SHA-256 of `YBOpenApi.jar` in the repository's `YBApi_sdk_java.zip`
+and includes the SDK classes from the 2015-08-20 archive. It supplies a replacement HTTP transport
+with the JVM's certificate trust and hostname verification, bounded timeouts and no redirects.
+The starter no longer resolves `cn.yiban.open:java-sdk:1.6.0`.
+
 ## 4. Auto-configuration
 
 The starter auto-configures the following beans:

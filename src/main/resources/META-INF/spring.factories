@@ -1,0 +1,3 @@
+org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
+org.springframework.security.boot.SecurityYibanAutoConfiguration,\
+org.springframework.security.boot.SecurityYibanFilterConfiguration

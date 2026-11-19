@@ -55,6 +55,15 @@
 | Spring Boot | `2.3.12.RELEASE` | `pom.xml` parent |
 | Maven | `3.0` | Maven Enforcer |
 
+使用 Boot 父 POM 的 Boot 2.3 应用，请在应用 POM 中将 `spring-framework.version` 设为
+`5.3.39`、`spring-security.version` 设为 `5.8.14`。Security Biz 固定使用 Easy4J 已发布的
+快照构建 `2.7.x.20260630-20261029.080305-2`，本 Starter 在 JDK 8 与 Boot 2.3.12 上验证其运行兼容性。
+构建和消费该构件时需配置 Easy4J Maven 快照仓库。
+
+构建校验仓库内 `YBApi_sdk_java.zip` 中 `YBOpenApi.jar` 的 SHA-256，再打包 2015-08-20
+归档中的 SDK 类。HTTP 传输使用 JVM 证书信任库和主机名校验，设定超时并禁用重定向。
+Starter 不再解析 `cn.yiban.open:java-sdk:1.6.0`。
+
 ## 4. 自动装配
 
 Starter 自动装配以下 Bean：

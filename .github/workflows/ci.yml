@@ -2,7 +2,7 @@ name: CI
 
 on:
   push:
-    branches: [main, 2.3.x, 2.7.x, 3.0.x, 3.1.x, 3.2.x, 3.3.x, 3.4.x, 3.5.x, 4.0.x, 4.1.x]
+    branches: [main, test/20261119, 2.3.x, 2.7.x, 3.0.x, 3.1.x, 3.2.x, 3.3.x, 3.4.x, 3.5.x, 4.0.x, 4.1.x]
   pull_request:
     branches: [main, 2.3.x, 2.7.x, 3.0.x, 3.1.x, 3.2.x, 3.3.x, 3.4.x, 3.5.x, 4.0.x, 4.1.x]
 
@@ -13,5 +13,5 @@ jobs:
   build:
     uses: easy-4-java/.github/.github/workflows/maven-starter-ci.yml@main
     with:
-      version-line: ${{ (github.base_ref || github.ref_name) == 'main' && '2.3.x' || '' }}
+      version-line: ${{ ( (github.base_ref || github.ref_name) == 'main' || (github.base_ref || github.ref_name) == 'test/20261119' ) && '2.3.x' || '' }}
     secrets: inherit

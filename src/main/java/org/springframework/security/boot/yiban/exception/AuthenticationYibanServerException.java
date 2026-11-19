@@ -17,13 +17,13 @@ package org.springframework.security.boot.yiban.exception;
 
 
 import org.springframework.security.boot.biz.exception.AuthResponseCode;
-import org.springframework.security.boot.biz.exception.AuthenticationServiceExceptionAdapter;
+import org.springframework.security.authentication.AuthenticationServiceException;
 
 /**
  *
  */
 @SuppressWarnings("serial")
-public class AuthenticationYibanServerException extends AuthenticationServiceExceptionAdapter {
+public class AuthenticationYibanServerException extends AuthenticationServiceException {
 	
 	final String code;
 	
@@ -37,7 +37,7 @@ public class AuthenticationYibanServerException extends AuthenticationServiceExc
 	 * @param msg the detail message
 	 */
 	public AuthenticationYibanServerException(String code, String msg) {
-		super(AuthResponseCode.SC_AUTHZ_THIRD_PARTY_SERVICE, msg);
+		super(msg);
 		this.code = code;
 	}
 
@@ -49,10 +49,14 @@ public class AuthenticationYibanServerException extends AuthenticationServiceExc
 	 * @param t root cause
 	 */
 	public AuthenticationYibanServerException(String code, String msg, Throwable t) {
-		super(AuthResponseCode.SC_AUTHZ_THIRD_PARTY_SERVICE, msg, t);
+		super(msg, t);
 		this.code = code;
 	}
 	
+	public AuthResponseCode getAuthCode() {
+		return AuthResponseCode.SC_AUTHZ_THIRD_PARTY_SERVICE;
+	}
+
 	public String getCode() {
 		return code;
 	}
